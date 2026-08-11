@@ -1,0 +1,7 @@
+{
+  "familyName": "Example Family Bank",
+  "owner": { "name": "Parent1", "email": "parent1@example.com" },
+  "coParents": [{ "name": "Parent2", "email": "parent2@example.com" }],
+  "kids": [{ "name": "Kid1", "email": "kid1@example.com" }],
+  "expectedTotalsCents": { "Kid1": 0 }
+}
