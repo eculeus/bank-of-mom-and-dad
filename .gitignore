@@ -54,3 +54,4 @@ functions/node_modules/
 # Real family data — never commit; copy scripts/seed/family.config.example.json instead
 scripts/seed/family.config.json
 scripts/seed/export.csv
+secrets/
