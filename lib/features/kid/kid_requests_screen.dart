@@ -44,8 +44,8 @@ class KidRequestsScreen extends ConsumerWidget {
       floatingActionButton: disabled
           ? null
           : FloatingActionButton.extended(
-              icon: const Icon(Icons.send),
-              label: const Text('Ask for money 💸'),
+              icon: const Icon(Icons.add),
+              label: const Text('Add Transaction'),
               onPressed: () => showModalBottomSheet(
                 context: context, isScrollControlled: true,
                 shape: const RoundedRectangleBorder(
