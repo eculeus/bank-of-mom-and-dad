@@ -1,4 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import '../core/emulators.dart';
 
 class AuthService {
@@ -7,7 +9,17 @@ class AuthService {
 
   Future<void> signInWithGoogle() async {
     final provider = GoogleAuthProvider()..setCustomParameters({'prompt': 'select_account'});
-    await _auth.signInWithPopup(provider);
+    // Popups die on mobile Safari (the opener tab gets backgrounded and WebKit
+    // closes IndexedDB mid-sign-in: "Database is closing/hidden"), so use the
+    // single-tab redirect flow on phones/tablets.
+    final mobileWeb = kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.android);
+    if (mobileWeb) {
+      await _auth.signInWithRedirect(provider);
+    } else {
+      await _auth.signInWithPopup(provider);
+    }
   }
 
   /// Emulator-only test accounts; creates on first use.
