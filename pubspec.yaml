@@ -1,7 +1,7 @@
 name: bank_of_mom_and_dad
 description: "Bank of Mom & Dad — family allowance PWA."
 publish_to: 'none'
-version: 0.1.0
+version: 0.1.0+1
 
 environment:
   sdk: ^3.10.4
