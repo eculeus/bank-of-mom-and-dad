@@ -26,10 +26,7 @@ class DefaultFirebaseOptions {
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -59,5 +56,15 @@ class DefaultFirebaseOptions {
     projectId: 'bank-of-mom-and-dad-ho',
     authDomain: 'bank-of-mom-and-dad-ho.firebaseapp.com',
     storageBucket: 'bank-of-mom-and-dad-ho.firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyC668HcOjW0KfXRO_IdITg9hKaqUmUv1Gg',
+    appId: '1:109157925075:ios:d1f8b8087f9391c2e05426',
+    messagingSenderId: '109157925075',
+    projectId: 'bank-of-mom-and-dad-ho',
+    storageBucket: 'bank-of-mom-and-dad-ho.firebasestorage.app',
+    iosClientId: '109157925075-3k9ubr9o7b7p9h44aj263iiu1bfo6kic.apps.googleusercontent.com',
+    iosBundleId: 'com.eculeus.bomad',
   );
 }
