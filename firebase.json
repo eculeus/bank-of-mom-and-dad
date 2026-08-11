@@ -5,8 +5,17 @@
         "lib/firebase_options.dart": {
           "projectId": "bank-of-mom-and-dad-ho",
           "configurations": {
+            "ios": "1:109157925075:ios:d1f8b8087f9391c2e05426",
             "web": "1:109157925075:web:b80ce6c81d4caf6fe05426"
           }
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "bank-of-mom-and-dad-ho",
+          "appId": "1:109157925075:ios:d1f8b8087f9391c2e05426",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
         }
       }
     }
