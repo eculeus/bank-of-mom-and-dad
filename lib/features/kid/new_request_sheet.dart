@@ -58,7 +58,7 @@ class _NewRequestSheetState extends State<NewRequestSheet> {
         SegmentedButton<bool>(
           segments: const [
             ButtonSegment(value: true, label: Text('Ask for money')),
-            ButtonSegment(value: false, label: Text('Cash out')),
+            ButtonSegment(value: false, label: Text('Spend Money')),
           ],
           selected: {_askingFor},
           onSelectionChanged: (s) => setState(() => _askingFor = s.first),

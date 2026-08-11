@@ -1,12 +1,13 @@
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:confetti/confetti.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/money.dart';
+import '../../core/theme.dart';
 import '../../models/models.dart';
 import '../../state/providers.dart';
 import '../../widgets/balance_text.dart';
+import '../../widgets/cash_rain.dart';
 import '../../widgets/expandable_note.dart';
 import 'kid_home_logic.dart';
 import 'kid_requests_screen.dart';
@@ -25,11 +26,11 @@ class _KidHomeScreenState extends ConsumerState<KidHomeScreen> {
   bool _seenCaptured = false;
   bool _celebrate = false;
   int _tab = 0;
-  late final _confetti = ConfettiController(duration: const Duration(seconds: 2));
+  late final _cashRain = CashRainController();
 
   @override
   void dispose() {
-    _confetti.dispose();
+    _cashRain.dispose();
     super.dispose();
   }
 
@@ -57,6 +58,8 @@ class _KidHomeScreenState extends ConsumerState<KidHomeScreen> {
     final disabled = member.status == 'disabled';
 
     return Scaffold(
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+      drawer: _ProfileDrawer(member: member),
       body: IndexedStack(
         index: _tab,
         children: [
@@ -65,7 +68,7 @@ class _KidHomeScreenState extends ConsumerState<KidHomeScreen> {
             member: member,
             prevSeenAt: _prevSeenAt,
             celebrate: _celebrate,
-            confetti: _confetti,
+            cashRain: _cashRain,
             disabled: disabled,
           ),
           KidRequestsScreen(familyId: widget.familyId, memberId: member.id, disabled: disabled),
@@ -83,38 +86,108 @@ class _KidHomeScreenState extends ConsumerState<KidHomeScreen> {
   }
 }
 
+class _ProfileDrawer extends ConsumerWidget {
+  final Member member;
+  const _ProfileDrawer({required this.member});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final email = FirebaseAuth.instance.currentUser?.email;
+    return Drawer(
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+              child: Row(children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: kidColors[member.colorIndex % kidColors.length],
+                  child: Text(member.displayName.characters.first,
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(member.displayName,
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w800)),
+                      if (email != null)
+                        Text(email, style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+              ]),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Sign out'),
+              onTap: () {
+                Navigator.of(context).pop();
+                ref.read(authServiceProvider).signOut();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _MoneyTab extends ConsumerStatefulWidget {
   final String familyId;
   final Member member;
   final DateTime? prevSeenAt;
   final bool celebrate;
   final bool disabled;
-  final ConfettiController confetti;
+  final CashRainController cashRain;
   const _MoneyTab({required this.familyId, required this.member, required this.prevSeenAt,
-      required this.celebrate, required this.disabled, required this.confetti});
+      required this.celebrate, required this.disabled, required this.cashRain});
 
   @override
   ConsumerState<_MoneyTab> createState() => _MoneyTabState();
 }
 
 class _MoneyTabState extends ConsumerState<_MoneyTab> {
-  bool _confettiFired = false;
+  bool _celebrateFired = false;
+  bool _seenTxIdsInitialized = false;
+  final Set<String> _seenTxIds = {};
 
   @override
   Widget build(BuildContext context) {
     final txsAsync = ref.watch(kidTransactionsProvider(
         (familyId: widget.familyId, kidMemberId: widget.member.id)));
     final txs = txsAsync.value ?? const <BankTransaction>[];
-    final hasNewDeposit = txs.any((t) =>
-        isNewTransaction(t.createdAt, widget.prevSeenAt) && t.amountCents > 0);
-    if (widget.celebrate && hasNewDeposit && !_confettiFired) {
-      _confettiFired = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) => widget.confetti.play());
+
+    // (a) Celebrate on open: fires once per screen visit whenever the kid
+    // has been away for a while, regardless of whether anything landed.
+    if (widget.celebrate && !_celebrateFired) {
+      _celebrateFired = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) => widget.cashRain.burst());
+    }
+
+    // (b) Live arrivals: the first (possibly already-populated) snapshot is
+    // just the baseline — no burst for history the kid already knows about.
+    // Any transaction id that shows up afterward is new and rains.
+    if (txs.isNotEmpty && !_seenTxIdsInitialized) {
+      _seenTxIdsInitialized = true;
+      _seenTxIds.addAll(txs.map((t) => t.id));
+    } else if (_seenTxIdsInitialized) {
+      final newIds = txs.map((t) => t.id).where((id) => !_seenTxIds.contains(id)).toList();
+      if (newIds.isNotEmpty) {
+        _seenTxIds.addAll(newIds);
+        WidgetsBinding.instance.addPostFrameCallback((_) => widget.cashRain.burst());
+      }
     }
 
     return Stack(alignment: Alignment.topCenter, children: [
       ListView(
-        padding: const EdgeInsets.fromLTRB(16, 48, 16, 32),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
           if (widget.disabled)
             MaterialBanner(
@@ -167,23 +240,9 @@ class _MoneyTabState extends ConsumerState<_MoneyTab> {
           if (txs.isEmpty && !txsAsync.isLoading)
             const Padding(padding: EdgeInsets.all(32),
                 child: Center(child: Text('No transactions yet!'))),
-          const SizedBox(height: 24),
-          Center(
-            child: TextButton.icon(
-              icon: const Icon(Icons.logout, size: 16),
-              label: const Text('Sign out'),
-              onPressed: () => ref.read(authServiceProvider).signOut(),
-            ),
-          ),
         ],
       ),
-      ConfettiWidget(
-        confettiController: widget.confetti,
-        blastDirection: pi / 2,
-        emissionFrequency: 0.4,
-        numberOfParticles: 24,
-        shouldLoop: false,
-      ),
+      CashRain(controller: widget.cashRain),
     ]);
   }
 }
