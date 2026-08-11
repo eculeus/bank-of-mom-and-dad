@@ -15,7 +15,7 @@ export async function sendPushToUid(uid, title, body) {
   const res = await getMessaging().sendEachForMulticast({
     tokens,
     notification: { title, body },
-    webpush: { fcmOptions: { link: 'https://bank-of-mom-and-dad-ho.web.app/' } },
+    webpush: { fcmOptions: { link: 'https://bomad.web.app/' } },
   });
   const dead = [];
   res.responses.forEach((r, i) => {
