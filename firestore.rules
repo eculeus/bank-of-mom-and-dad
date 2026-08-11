@@ -1,0 +1,119 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function myFams() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.families;
+    }
+    function famEntry(fid) { return myFams()[fid]; }
+    function isActiveParent(fid) {
+      return signedIn() && fid in myFams()
+        && famEntry(fid).role == 'parent' && famEntry(fid).status == 'active';
+    }
+    // active OR disabled members may still read (disabled kids keep history access)
+    function canRead(fid) {
+      return signedIn() && fid in myFams() && famEntry(fid).status in ['active', 'disabled'];
+    }
+    function isOwnKidDoc(fid, kidMemberId) {
+      return signedIn() && fid in myFams() && famEntry(fid).memberId == kidMemberId;
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create: if signedIn() && request.auth.uid == uid
+        && !('families' in request.resource.data);
+      allow update: if signedIn() && request.auth.uid == uid
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['families']);
+      allow delete: if false;
+    }
+
+    match /families/{fid} {
+      allow read: if canRead(fid);
+      allow update: if isActiveParent(fid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0;
+      allow create, delete: if false; // createFamily callable only
+
+      match /members/{mid} {
+        allow read: if canRead(fid);
+        allow create: if isActiveParent(fid)
+          && request.resource.data.uid == null
+          && request.resource.data.status == 'invited'
+          && request.resource.data.role in ['parent', 'kid']
+          && request.resource.data.isOwner == false
+          && request.resource.data.balanceCents == 0
+          && request.resource.data.balanceCents is int
+          && request.resource.data.email is string
+          && request.resource.data.email == request.resource.data.email.lower()
+          && request.resource.data.displayName is string
+          && request.resource.data.displayName.size() > 0;
+        allow update: if
+          (isActiveParent(fid)
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['displayName', 'status', 'colorIndex'])
+            && request.resource.data.status in ['invited', 'active', 'disabled']
+            && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['status'])
+                || resource.data.role == 'kid')
+            && request.resource.data.displayName is string
+            && request.resource.data.displayName.size() > 0)
+          || (signedIn() && resource.data.uid == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['displayName', 'lastSeenAt', 'colorIndex']));
+        allow delete: if false;
+      }
+
+      match /transactions/{txId} {
+        allow read: if isActiveParent(fid)
+          || (canRead(fid) && isOwnKidDoc(fid, resource.data.kidMemberId));
+        allow create: if isActiveParent(fid)
+          && request.resource.data.amountCents is int
+          && request.resource.data.reason is string
+          && request.resource.data.reason.size() > 0
+          && request.resource.data.source == 'parent'
+          && request.resource.data.createdByUid == request.auth.uid;
+        allow update: if isActiveParent(fid)
+          && resource.data.createdByUid == request.auth.uid
+          && request.resource.data.amountCents is int
+          && request.resource.data.createdByUid == resource.data.createdByUid
+          && request.resource.data.kidMemberId == resource.data.kidMemberId
+          && request.resource.data.source == resource.data.source
+          && request.resource.data.reason is string
+          && request.resource.data.reason.size() > 0;
+        allow delete: if isActiveParent(fid)
+          && resource.data.createdByUid == request.auth.uid;
+      }
+
+      match /requests/{reqId} {
+        allow read: if isActiveParent(fid)
+          || (canRead(fid) && isOwnKidDoc(fid, resource.data.kidMemberId));
+        allow create: if signedIn() && fid in myFams()
+          && famEntry(fid).role == 'kid' && famEntry(fid).status == 'active'
+          && request.resource.data.kidMemberId == famEntry(fid).memberId
+          && request.resource.data.status == 'pending'
+          && request.resource.data.amountCents is int
+          && request.resource.data.reason is string
+          && request.resource.data.reason.size() > 0
+          && request.resource.data.decidedByUid == null
+          && request.resource.data.hiddenByKid == false
+          && (!('origin' in request.resource.data) || request.resource.data.origin == 'kid');
+        allow update: if signedIn()
+          && isOwnKidDoc(fid, resource.data.kidMemberId)
+          && resource.data.status != 'pending'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hiddenByKid']);
+        allow delete: if false; // decisions via decideRequest callable
+      }
+
+      match /recurring/{recId} {
+        allow read, delete: if isActiveParent(fid);
+        allow create, update: if isActiveParent(fid)
+          && request.resource.data.amountCents is int
+          && request.resource.data.interval in ['weekly', 'monthly'];
+      }
+
+      match /notificationState/{pid} {
+        allow read, write: if false;
+      }
+    }
+  }
+}

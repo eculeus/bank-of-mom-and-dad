@@ -1,0 +1,30 @@
+name: bank_of_mom_and_dad
+description: "Bank of Mom & Dad — family allowance PWA."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  cloud_firestore: ^6.8.0
+  cloud_functions: ^6.3.6
+  collection: ^1.19.1
+  confetti: ^0.8.0
+  firebase_auth: ^6.5.7
+  firebase_core: ^4.13.0
+  firebase_messaging: ^16.5.0
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.3.2
+  google_fonts: ^8.2.1
+  intl: ^0.20.3
+  web: ^1.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
