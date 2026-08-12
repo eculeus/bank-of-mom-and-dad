@@ -23,6 +23,24 @@ class KidDetailScreen extends ConsumerWidget {
     final myUid = FirebaseAuth.instance.currentUser!.uid;
     return Scaffold(
       appBar: AppBar(title: Text('${liveKid.displayName} — ${formatCents(liveKid.balanceCents)}')),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFFD50000),
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.attach_money),
+        // The transaction is scoped to this kid automatically — no picker.
+        label: Text('Add / Subtract for ${liveKid.displayName}'),
+        onPressed: () => showModalBottomSheet(
+          context: context, isScrollControlled: true,
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+          builder: (_) => TransactionSheet(
+            kids: [liveKid], preselectedKid: liveKid,
+            onSubmit: ({required kidMemberId, required amountCents, required reason, required date, note}) =>
+                submitTransaction(familyId, kidMemberId: kidMemberId, amountCents: amountCents,
+                    reason: reason, date: date, note: note),
+          ),
+        ),
+      ),
       body: txs.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Could not load history: $e')),

@@ -36,7 +36,9 @@ class _TransactionSheetState extends State<TransactionSheet> {
   @override
   void initState() {
     super.initState();
-    _kidId = widget.existing?.kidMemberId ?? widget.preselectedKid?.id;
+    _kidId = widget.existing?.kidMemberId ??
+        widget.preselectedKid?.id ??
+        (widget.kids.length == 1 ? widget.kids.first.id : null);
     if (widget.existing != null) _deposit = widget.existing!.amountCents >= 0;
   }
 
@@ -76,16 +78,20 @@ class _TransactionSheetState extends State<TransactionSheet> {
         Text(widget.existing == null ? 'New transaction' : 'Edit transaction',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: 16),
-        Wrap(spacing: 8, children: [
-          for (final kid in widget.kids)
-            ChoiceChip(
-              label: Text(kid.displayName),
-              selected: _kidId == kid.id,
-              selectedColor: kidColors[kid.colorIndex % kidColors.length].withValues(alpha: 0.3),
-              onSelected: (_) => setState(() => _kidId = kid.id),
-            ),
-        ]),
-        const SizedBox(height: 16),
+        // With a single kid the sheet is already scoped to them (opened from
+        // their own screen), so the picker is redundant — hide it.
+        if (widget.kids.length > 1) ...[
+          Wrap(spacing: 8, children: [
+            for (final kid in widget.kids)
+              ChoiceChip(
+                label: Text(kid.displayName),
+                selected: _kidId == kid.id,
+                selectedColor: kidColors[kid.colorIndex % kidColors.length].withValues(alpha: 0.3),
+                onSelected: (_) => setState(() => _kidId = kid.id),
+              ),
+          ]),
+          const SizedBox(height: 16),
+        ],
         SegmentedButton<bool>(
           segments: const [
             ButtonSegment(value: true, label: Text('Deposit'), icon: Icon(Icons.add)),

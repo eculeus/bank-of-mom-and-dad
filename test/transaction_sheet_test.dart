@@ -64,7 +64,8 @@ void main() {
       ),
     ));
 
-    await tester.tap(find.text('Alex'));
+    // Single kid: picker is hidden and the kid is auto-selected, so no chip tap.
+    expect(find.text('Alex'), findsNothing);
     await tester.enterText(find.byKey(const Key('amount')), '5.00');
     await tester.enterText(find.byKey(const Key('reason')), 'Allowance');
     await tester.pump();
