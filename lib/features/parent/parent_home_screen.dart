@@ -4,13 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/money.dart';
 import '../../core/theme.dart';
-import '../../models/models.dart';
 import '../../state/providers.dart';
 import 'kid_detail_screen.dart';
 import 'manage_family_screen.dart';
 import 'recurring_screen.dart';
 import 'requests_screen.dart';
-import 'transaction_sheet.dart';
 
 Future<void> submitTransaction(String familyId, {
   required String kidMemberId, required int amountCents, required String reason,
@@ -37,20 +35,6 @@ Future<void> submitTransaction(String familyId, {
 class ParentHomeScreen extends ConsumerWidget {
   final String familyId;
   const ParentHomeScreen({super.key, required this.familyId});
-
-  void _openSheet(BuildContext context, List<Member> kids, {Member? preselected}) {
-    showModalBottomSheet(
-      context: context, isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
-      builder: (_) => TransactionSheet(
-        kids: kids, preselectedKid: preselected,
-        onSubmit: ({required kidMemberId, required amountCents, required reason, required date, note}) =>
-            submitTransaction(familyId, kidMemberId: kidMemberId, amountCents: amountCents,
-                reason: reason, date: date, note: note),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -145,17 +129,18 @@ class ParentHomeScreen extends ConsumerWidget {
                 ),
               ),
             ),
+          if (kids.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Center(
+                child: Text('Tap a kid to add or subtract money 💰',
+                    style: Theme.of(context).textTheme.bodySmall),
+              ),
+            ),
           if (kids.isEmpty)
             const Padding(padding: EdgeInsets.all(48),
                 child: Center(child: Text('No kids yet — add them in settings ⚙️'))),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFFD50000),
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.attach_money),
-        label: const Text('Add / Subtract'),
-        onPressed: (membersAsync.hasValue && kids.isEmpty) ? null : () => _openSheet(context, kids),
       ),
     );
   }
