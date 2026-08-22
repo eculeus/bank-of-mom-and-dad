@@ -8,6 +8,7 @@ import '../../core/theme.dart';
 import '../../models/models.dart';
 import '../../state/providers.dart';
 import '../../widgets/expandable_note.dart';
+import '../../widgets/month_header.dart';
 import 'parent_home_screen.dart' show submitTransaction;
 import 'transaction_sheet.dart';
 
@@ -45,16 +46,15 @@ class KidDetailScreen extends ConsumerWidget {
       body: txs.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Could not load history: $e')),
-        data: (list) => ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: list.length,
-          separatorBuilder: (_, _) => const Divider(height: 1),
-          itemBuilder: (_, i) {
-            final tx = list[i];
-            return ListTile(
+        data: (list) => ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+          children: groupByMonth<BankTransaction>(
+            items: list,
+            dateOf: (t) => t.date,
+            item: (tx) => ListTile(
               title: Text(tx.reason),
               subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('${formatDate(tx.date)}${tx.editedAtLabel}'),
+                Text('${formatTxDay(tx.date)}${tx.editedAtLabel}'),
                 if (tx.note != null) ExpandableNote(text: tx.note!),
               ]),
               trailing: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -99,8 +99,8 @@ class KidDetailScreen extends ConsumerWidget {
                     ],
                   ),
               ]),
-            );
-          },
+            ),
+          ),
         ),
       ),
     );

@@ -62,8 +62,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       ),
                       child: Center(
                         child: Text('\$',
-                            style: GoogleFonts.fredoka(
-                                color: Colors.white, fontSize: 58, fontWeight: FontWeight.w700)),
+                            style: GoogleFonts.inter(
+                                color: Colors.white, fontSize: 56, fontWeight: FontWeight.w800)),
                       ),
                     ),
                   ),
