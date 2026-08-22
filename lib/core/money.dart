@@ -10,6 +10,15 @@ String formatCentsSigned(int cents) =>
 String formatDate(DateTime d) =>
     '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
+final DateFormat _monthHeader = DateFormat('MMMM y'); // "August 2026"
+final DateFormat _txDay = DateFormat('EEE, MMM d'); // "Wed, Aug 28"
+
+String formatMonthHeader(DateTime d) => _monthHeader.format(d);
+String formatTxDay(DateTime d) => _txDay.format(d);
+
+/// Stable key for grouping transactions by calendar month.
+int monthKey(DateTime d) => d.year * 12 + d.month;
+
 int? parseDollarsToCents(String raw) {
   var s = raw
       .trim()

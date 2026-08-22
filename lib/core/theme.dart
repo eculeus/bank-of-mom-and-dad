@@ -35,7 +35,7 @@ ThemeData buildBankTheme() {
     onSurface: kBrandInk,
   );
   final base = ThemeData(useMaterial3: true, colorScheme: scheme);
-  final textTheme = GoogleFonts.fredokaTextTheme(base.textTheme).apply(
+  final textTheme = GoogleFonts.interTextTheme(base.textTheme).apply(
     bodyColor: kBrandInk,
     displayColor: kBrandInk,
   );
@@ -49,8 +49,8 @@ ThemeData buildBankTheme() {
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: false,
-      titleTextStyle: GoogleFonts.fredoka(
-          color: kBrandInk, fontSize: 22, fontWeight: FontWeight.w700),
+      titleTextStyle: GoogleFonts.inter(
+          color: kBrandInk, fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: -0.3),
     ),
     cardTheme: CardThemeData(
       color: Colors.white,

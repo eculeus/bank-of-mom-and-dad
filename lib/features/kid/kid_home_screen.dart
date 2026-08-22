@@ -9,6 +9,7 @@ import '../../state/providers.dart';
 import '../../widgets/balance_text.dart';
 import '../../widgets/cash_rain.dart';
 import '../../widgets/expandable_note.dart';
+import '../../widgets/month_header.dart';
 import 'kid_home_logic.dart';
 import 'kid_requests_screen.dart';
 
@@ -254,9 +255,12 @@ class _MoneyTabState extends ConsumerState<_MoneyTab> {
           const SizedBox(height: 28),
           Text('History', style: Theme.of(context).textTheme.titleMedium
               ?.copyWith(fontWeight: FontWeight.w700)),
-          const SizedBox(height: 8),
-          for (final tx in txs)
-            _TxTile(tx: tx, highlight: isNewTransaction(tx.createdAt, widget.prevSeenAt)),
+          ...groupByMonth<BankTransaction>(
+            items: txs,
+            dateOf: (t) => t.date,
+            item: (tx) => _TxTile(
+                tx: tx, highlight: isNewTransaction(tx.createdAt, widget.prevSeenAt)),
+          ),
           if (txs.isEmpty && !txsAsync.isLoading)
             const Padding(padding: EdgeInsets.all(32),
                 child: Center(child: Text('No transactions yet!'))),
@@ -278,7 +282,7 @@ class _TxTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 8),
       title: Text(tx.reason),
       subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(formatDate(tx.date)),
+        Text(formatTxDay(tx.date)),
         if (tx.note != null) ExpandableNote(text: tx.note!),
       ]),
       trailing: Text(formatCentsSigned(tx.amountCents),
