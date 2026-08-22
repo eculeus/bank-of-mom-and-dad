@@ -93,12 +93,9 @@ class ParentHomeScreen extends ConsumerWidget {
         children: [
           for (final kid in kids)
             Card(
-              elevation: 3,
-              margin: const EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-              color: kidColors[kid.colorIndex % kidColors.length].withValues(alpha: 0.12),
+              margin: const EdgeInsets.only(bottom: 14),
               child: InkWell(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(26),
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(
                     builder: (_) => KidDetailScreen(familyId: familyId, kid: kid))),
                 child: Padding(
@@ -124,7 +121,7 @@ class ParentHomeScreen extends ConsumerWidget {
                     Text(formatCents(kid.balanceCents),
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: kid.balanceCents < 0 ? Colors.red.shade700 : Colors.green.shade800)),
+                            color: kid.balanceCents < 0 ? kMoneyDown : kMoneyUp)),
                   ]),
                 ),
               ),

@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import '../core/money.dart';
+import '../core/theme.dart';
 
 class BalanceText extends StatelessWidget {
   final int cents;
   final bool celebrate;
-  const BalanceText({super.key, required this.cents, required this.celebrate});
+  final Color? color;
+  const BalanceText({super.key, required this.cents, required this.celebrate, this.color});
 
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.displayLarge?.copyWith(
         fontWeight: FontWeight.w900,
-        color: cents < 0 ? Colors.red.shade700 : Colors.green.shade800);
+        color: color ?? (cents < 0 ? kMoneyDown : kMoneyUp));
     if (!celebrate) return Text(formatCents(cents), style: style);
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
