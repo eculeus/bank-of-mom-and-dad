@@ -224,14 +224,34 @@ class _MoneyTabState extends ConsumerState<_MoneyTab> {
                 ),
               ],
             ),
-          const SizedBox(height: 16),
-          Center(
-            child: Text('Hi ${widget.member.displayName}! 👋',
-                style: Theme.of(context).textTheme.titleLarge),
-          ),
           const SizedBox(height: 8),
-          Center(child: BalanceText(cents: widget.member.balanceCents, celebrate: widget.celebrate)),
-          const SizedBox(height: 32),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+            decoration: BoxDecoration(
+              gradient: kBrandGradient,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                    color: kBrandIndigo.withValues(alpha: 0.35),
+                    blurRadius: 28, offset: const Offset(0, 14)),
+              ],
+            ),
+            child: Column(children: [
+              Text('Hi ${widget.member.displayName}! 👋',
+                  style: Theme.of(context).textTheme.titleLarge
+                      ?.copyWith(color: Colors.white.withValues(alpha: 0.9))),
+              const SizedBox(height: 4),
+              Text('Your balance',
+                  style: Theme.of(context).textTheme.labelLarge
+                      ?.copyWith(color: Colors.white.withValues(alpha: 0.7), letterSpacing: 1)),
+              const SizedBox(height: 8),
+              BalanceText(
+                  cents: widget.member.balanceCents,
+                  celebrate: widget.celebrate,
+                  color: Colors.white),
+            ]),
+          ),
+          const SizedBox(height: 28),
           Text('History', style: Theme.of(context).textTheme.titleMedium
               ?.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
@@ -263,7 +283,7 @@ class _TxTile extends StatelessWidget {
       ]),
       trailing: Text(formatCentsSigned(tx.amountCents),
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800,
-              color: tx.amountCents < 0 ? Colors.red.shade700 : Colors.green.shade800)),
+              color: tx.amountCents < 0 ? kMoneyDown : kMoneyUp)),
     );
     if (!highlight) return row;
     return TweenAnimationBuilder<double>(

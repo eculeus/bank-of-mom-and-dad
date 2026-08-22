@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/emulators.dart';
+import '../../core/theme.dart';
 import '../../state/providers.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
@@ -32,50 +34,89 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft, end: Alignment.bottomRight,
-            colors: [Color(0xFFFFF8E1), Color(0xFFFFE0B2)],
+          gradient: RadialGradient(
+            center: Alignment(0, -0.55), radius: 1.15,
+            colors: [Color(0xFFEDEFFE), kBrandBg],
           ),
         ),
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('🏦', style: TextStyle(fontSize: 72)),
-                const SizedBox(height: 12),
-                Text('Bank of Mom & Dad',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineMedium
-                        ?.copyWith(fontWeight: FontWeight.w800)),
-                const SizedBox(height: 32),
-                FilledButton.icon(
-                  onPressed: _busy ? null : () => _run(auth.signInWithGoogle),
-                  icon: const Icon(Icons.login),
-                  label: const Text('Sign in with Google'),
-                ),
-                if (kTestMode) ...[
-                  const Divider(height: 48),
-                  TextField(controller: _email,
-                      decoration: const InputDecoration(labelText: 'Test email')),
-                  TextField(controller: _password, obscureText: true,
-                      decoration: const InputDecoration(labelText: 'Test password')),
-                  const SizedBox(height: 12),
-                  OutlinedButton(
-                    onPressed: _busy
-                        ? null
-                        : () => _run(() => auth.signInWithTestAccount(
-                            _email.text.trim(), _password.text)),
-                    child: const Text('Test sign in'),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 380),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 104, height: 104,
+                      decoration: BoxDecoration(
+                        gradient: kBrandGradient,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: kBrandIndigo.withValues(alpha: 0.42),
+                            blurRadius: 30, offset: const Offset(0, 14)),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text('\$',
+                            style: GoogleFonts.fredoka(
+                                color: Colors.white, fontSize: 58, fontWeight: FontWeight.w700)),
+                      ),
+                    ),
                   ),
+                  const SizedBox(height: 28),
+                  Text('Bank of Mom & Dad',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 8),
+                  Text('Allowance, made simple.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(color: kBrandInk.withValues(alpha: 0.6))),
+                  const SizedBox(height: 36),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: kBrandInk,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      elevation: 6,
+                      shadowColor: kBrandIndigo.withValues(alpha: 0.28),
+                      textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                    ),
+                    onPressed: _busy ? null : () => _run(auth.signInWithGoogle),
+                    icon: const Icon(Icons.login, color: kBrandIndigo),
+                    label: const Text('Continue with Google'),
+                  ),
+                  if (kTestMode) ...[
+                    const Divider(height: 48),
+                    TextField(controller: _email,
+                        decoration: const InputDecoration(labelText: 'Test email')),
+                    const SizedBox(height: 8),
+                    TextField(controller: _password, obscureText: true,
+                        decoration: const InputDecoration(labelText: 'Test password')),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: _busy
+                          ? null
+                          : () => _run(() => auth.signInWithTestAccount(
+                              _email.text.trim(), _password.text)),
+                      child: const Text('Test sign in'),
+                    ),
+                  ],
+                  if (_error != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Text(_error!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: kMoneyDown)),
+                    ),
                 ],
-                if (_error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Text(_error!, style: const TextStyle(color: Colors.red)),
-                  ),
-              ],
+              ),
             ),
           ),
         ),

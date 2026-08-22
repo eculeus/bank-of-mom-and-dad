@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/money.dart';
+import '../../core/theme.dart';
 import '../../models/models.dart';
 import '../../state/providers.dart';
 import '../../widgets/expandable_note.dart';
@@ -24,7 +25,7 @@ class KidDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text('${liveKid.displayName} — ${formatCents(liveKid.balanceCents)}')),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFFD50000),
+        backgroundColor: kBrandIndigo,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.attach_money),
         // The transaction is scoped to this kid automatically — no picker.
@@ -59,7 +60,7 @@ class KidDetailScreen extends ConsumerWidget {
               trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                 Text(formatCentsSigned(tx.amountCents),
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
-                        color: tx.amountCents < 0 ? Colors.red.shade700 : Colors.green.shade800)),
+                        color: tx.amountCents < 0 ? kMoneyDown : kMoneyUp)),
                 if (tx.createdByUid == myUid)
                   PopupMenuButton<String>(
                     onSelected: (action) async {
