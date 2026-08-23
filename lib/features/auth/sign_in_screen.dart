@@ -62,7 +62,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       ),
                       child: Center(
                         child: Text('\$',
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.openSans(
                                 color: Colors.white, fontSize: 56, fontWeight: FontWeight.w800)),
                       ),
                     ),

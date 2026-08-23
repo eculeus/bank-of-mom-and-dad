@@ -35,10 +35,21 @@ ThemeData buildBankTheme() {
     onSurface: kBrandInk,
   );
   final base = ThemeData(useMaterial3: true, colorScheme: scheme);
-  final textTheme = GoogleFonts.interTextTheme(base.textTheme).apply(
-    bodyColor: kBrandInk,
-    displayColor: kBrandInk,
-  );
+  // Body stays Inter (clean, legible); headers use Open Sans to echo the
+  // established-bank feel of provident.bank (warm humanist sans, bold navy).
+  final inter = GoogleFonts.interTextTheme(base.textTheme);
+  TextStyle head(TextStyle? s, FontWeight w) =>
+      GoogleFonts.openSans(textStyle: s, fontWeight: w);
+  final textTheme = inter.copyWith(
+    displayLarge: head(inter.displayLarge, FontWeight.w800),
+    displayMedium: head(inter.displayMedium, FontWeight.w700),
+    displaySmall: head(inter.displaySmall, FontWeight.w700),
+    headlineLarge: head(inter.headlineLarge, FontWeight.w800),
+    headlineMedium: head(inter.headlineMedium, FontWeight.w800),
+    headlineSmall: head(inter.headlineSmall, FontWeight.w700),
+    titleLarge: head(inter.titleLarge, FontWeight.w700),
+    titleMedium: head(inter.titleMedium, FontWeight.w600),
+  ).apply(bodyColor: kBrandInk, displayColor: kBrandInk);
   return base.copyWith(
     textTheme: textTheme,
     scaffoldBackgroundColor: kBrandBg,
@@ -49,8 +60,8 @@ ThemeData buildBankTheme() {
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: false,
-      titleTextStyle: GoogleFonts.inter(
-          color: kBrandInk, fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: -0.3),
+      titleTextStyle: GoogleFonts.openSans(
+          color: kBrandInk, fontSize: 20, fontWeight: FontWeight.w800),
     ),
     cardTheme: CardThemeData(
       color: Colors.white,
