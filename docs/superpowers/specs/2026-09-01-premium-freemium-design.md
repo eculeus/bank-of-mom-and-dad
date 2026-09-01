@@ -16,7 +16,7 @@ who want premium subscribe from the iOS app.
 | Decision | Choice |
 |---|---|
 | Purchase surface | iOS only (Apple IAP). Unlocks on iOS **and** web. |
-| Price / model | **Annual only, $14.99/yr.** No monthly, no lifetime. |
+| Price / model | **Annual only, $9.99/yr.** No monthly, no lifetime. |
 | Entitlement scope | **Per family** — one parent buys, the whole family gets premium. |
 | Free tier | 2 kids + full ledger (add/subtract, history, requests, approvals). |
 | Premium adds | Unlimited kids · **receipt photos** · **CSV export** · **recurring templates**. |
@@ -71,7 +71,7 @@ map back to the right family even though Apple only knows the Apple ID.
 
 - **Package:** `in_app_purchase` (official Flutter plugin) + `in_app_purchase_storekit`.
 - **Product:** one auto‑renewable subscription, ID `bomad_premium_yearly`,
-  $14.99/yr, in an App Store Connect subscription group `Premium`.
+  $9.99/yr, in an App Store Connect subscription group `Premium`.
 - **Flow:**
   1. Parent taps **Upgrade** → paywall sheet → `buyNonConsumable`/`buy` for the
      subscription product.
